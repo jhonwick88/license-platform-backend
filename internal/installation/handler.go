@@ -19,9 +19,10 @@ func NewHandler(db *gorm.DB) *Handler {
 
 func (h *Handler) GetAll(c *gin.Context) {
 	var installations []database.Installation
-	if err := h.DB.Find(&installations).Error; err != nil {
+	if err := h.DB.Preload("License").Find(&installations).Error; err != nil {
 		middleware.ErrorResponse(c, http.StatusInternalServerError, "INTERNAL_ERROR", "Failed to fetch installations")
 		return
 	}
 	middleware.SuccessResponse(c, installations)
 }
+

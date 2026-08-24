@@ -20,7 +20,7 @@ func NewHandler(db *gorm.DB) *Handler {
 
 func (h *Handler) GetAll(c *gin.Context) {
 	var plans []database.Plan
-	if err := h.DB.Find(&plans).Error; err != nil {
+	if err := h.DB.Preload("Product").Find(&plans).Error; err != nil {
 		middleware.ErrorResponse(c, http.StatusInternalServerError, "INTERNAL_ERROR", "Failed to fetch plans")
 		return
 	}
@@ -44,4 +44,5 @@ func (h *Handler) Create(c *gin.Context) {
 	}
 	middleware.SuccessResponse(c, req)
 }
+
 

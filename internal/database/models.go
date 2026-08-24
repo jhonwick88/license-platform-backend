@@ -27,7 +27,8 @@ type Product struct {
 
 type Plan struct {
 	ID          string    `gorm:"type:varchar(36);primaryKey" json:"id"`
-	ProductID   string    `gorm:"type:varchar(36);not null" json:"product_id"`
+	ProductID   string    `gorm:"type:varchar(36);not null" json:"product_id"` 
+	Product     Product   `gorm:"foreignKey:ProductID" json:"product,omitempty"`
 	Code        string    `gorm:"type:varchar(100);uniqueIndex;not null" json:"code"`
 	Name        string    `gorm:"type:varchar(255);not null" json:"name"`
 	Description string    `gorm:"type:text" json:"description"`
@@ -38,7 +39,8 @@ type Plan struct {
 
 type Feature struct {
 	ID          string    `gorm:"type:varchar(36);primaryKey" json:"id"`
-	ProductID   string    `gorm:"type:varchar(36);not null" json:"product_id"`
+	ProductID   string    `gorm:"type:varchar(36);not null" json:"product_id"` 
+	Product     Product   `gorm:"foreignKey:ProductID" json:"product,omitempty"`
 	Code        string    `gorm:"type:varchar(100);uniqueIndex;not null" json:"code"`
 	Name        string    `gorm:"type:varchar(255);not null" json:"name"`
 	Description string    `gorm:"type:text" json:"description"`
@@ -50,8 +52,10 @@ type Feature struct {
 
 type PlanFeature struct {
 	ID        string    `gorm:"type:varchar(36);primaryKey" json:"id"`
-	PlanID    string    `gorm:"type:varchar(36);not null" json:"plan_id"`
-	FeatureID string    `gorm:"type:varchar(36);not null" json:"feature_id"`
+	PlanID    string    `gorm:"type:varchar(36);not null" json:"plan_id"` 
+	Plan      Plan      `gorm:"foreignKey:PlanID" json:"plan,omitempty"`
+	FeatureID string    `gorm:"type:varchar(36);not null" json:"feature_id"` 
+	Feature   Feature   `gorm:"foreignKey:FeatureID" json:"feature,omitempty"`
 	Value     string    `gorm:"type:varchar(255);not null" json:"value"`
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"`
@@ -74,10 +78,12 @@ type Customer struct {
 type License struct {
 	ID               string     `gorm:"type:varchar(36);primaryKey" json:"id"`
 	LicenseKey       string     `gorm:"type:varchar(255);uniqueIndex;not null" json:"license_key"`
-	CustomerID       string     `gorm:"type:varchar(36);not null" json:"customer_id"`
+	CustomerID       string     `gorm:"type:varchar(36);not null" json:"customer_id"` 
+	Customer         Customer   `gorm:"foreignKey:CustomerID" json:"customer,omitempty"`
 	ProductID        string     `gorm:"type:varchar(36);not null" json:"product_id"`
 	PlanID           string     `gorm:"type:varchar(36);not null" json:"plan_id"`
-	InstallationID   *string    `gorm:"type:varchar(36)" json:"installation_id"`
+	InstallationID   *string    `gorm:"type:varchar(36)" json:"installation_id"` 
+	Installation     *Installation `gorm:"foreignKey:InstallationID" json:"installation,omitempty"`
 	Status           string     `gorm:"type:varchar(50);not null;default:'PENDING'" json:"status"`
 	ActivatedAt      *time.Time `json:"activated_at"`
 	LastValidationAt *time.Time `json:"last_validation_at"`
@@ -87,7 +93,8 @@ type License struct {
 
 type Installation struct {
 	ID                 string     `gorm:"type:varchar(36);primaryKey" json:"id"`
-	LicenseID          string     `gorm:"type:varchar(36);not null" json:"license_id"`
+	LicenseID          string     `gorm:"type:varchar(36);not null" json:"license_id"` 
+	License            *License   `gorm:"foreignKey:LicenseID" json:"-"`
 	InstallationID     string     `gorm:"type:varchar(255);uniqueIndex;not null" json:"installation_id"`
 	MachineFingerprint string     `gorm:"type:varchar(255);not null" json:"machine_fingerprint"`
 	Platform           string     `gorm:"type:varchar(100)" json:"platform"`
@@ -110,7 +117,8 @@ type ClientDevice struct {
 
 type AppVersion struct {
 	ID          string    `gorm:"type:varchar(36);primaryKey" json:"id"`
-	ProductID   string    `gorm:"type:varchar(36);not null" json:"product_id"`
+	ProductID   string    `gorm:"type:varchar(36);not null" json:"product_id"` 
+	Product     Product   `gorm:"foreignKey:ProductID" json:"product,omitempty"`
 	Version     string    `gorm:"type:varchar(50);not null" json:"version"`
 	ReleaseDate time.Time `json:"release_date"`
 	IsCritical  bool      `gorm:"default:false" json:"is_critical"`
@@ -155,3 +163,4 @@ type TransferLog struct {
 	AuthorizedBy  string    `gorm:"type:varchar(36);not null" json:"authorized_by"`
 	CreatedAt     time.Time `gorm:"autoCreateTime" json:"created_at"`
 }
+

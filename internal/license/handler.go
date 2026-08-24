@@ -20,7 +20,7 @@ func NewAdminHandler(db *gorm.DB) *AdminHandler {
 
 func (h *AdminHandler) GetAll(c *gin.Context) {
 	var licenses []database.License
-	if err := h.DB.Find(&licenses).Error; err != nil {
+	if err := h.DB.Preload("Product").Preload("Customer").Preload("Plan").Preload("Installation").Find(&licenses).Error; err != nil {
 		middleware.ErrorResponse(c, http.StatusInternalServerError, "INTERNAL_ERROR", "Failed to fetch licenses")
 		return
 	}
@@ -72,3 +72,4 @@ func (h *AdminHandler) Revoke(c *gin.Context) {
 	}
 	middleware.SuccessResponse(c, gin.H{"message": "License revoked"})
 }
+
