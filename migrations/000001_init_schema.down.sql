@@ -1,0 +1,14 @@
+DROP TABLE IF EXISTS transfer_logs;
+DROP TABLE IF EXISTS validation_logs;
+DROP TABLE IF EXISTS activation_logs;
+DROP TABLE IF EXISTS audit_logs;
+DROP TABLE IF EXISTS app_versions;
+DROP TABLE IF EXISTS client_devices;
+DROP TABLE IF EXISTS installations;
+DROP TABLE IF EXISTS licenses;
+DROP TABLE IF EXISTS customers;
+DROP TABLE IF EXISTS plan_features;
+DROP TABLE IF EXISTS features;
+DROP TABLE IF EXISTS plans;
+DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS users;

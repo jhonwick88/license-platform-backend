@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: license_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_NAME:-license_platform}
+      MYSQL_USER: ${DB_USER:-license_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-root}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - license_network
+
+  license-api:
+    build: .
+    container_name: license_api
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=${DB_USER:-license_user}
+      - DB_PASSWORD=${DB_PASSWORD:-root}
+      - DB_NAME=${DB_NAME:-license_platform}
+      - JWT_SECRET=${JWT_SECRET:-secret_key}
+      - SERVER_PORT=8080
+    depends_on:
+      - mysql
+    networks:
+      - license_network
+
+volumes:
+  mysql_data:
+
+networks:
+  license_network:
+    driver: bridge
