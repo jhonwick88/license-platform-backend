@@ -23,6 +23,7 @@ type Product struct {
 	Status      string    `gorm:"type:varchar(50);not null;default:'ACTIVE'" json:"status"`
 	CreatedAt   time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt   time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+	PlanFeatures []PlanFeature `gorm:"foreignKey:PlanID" json:"plan_features,omitempty"`
 }
 
 type Plan struct {
@@ -35,6 +36,7 @@ type Plan struct {
 	Status      string    `gorm:"type:varchar(50);not null;default:'ACTIVE'" json:"status"`
 	CreatedAt   time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt   time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+	PlanFeatures []PlanFeature `gorm:"foreignKey:PlanID" json:"plan_features,omitempty"`
 }
 
 type Feature struct {
@@ -48,6 +50,7 @@ type Feature struct {
 	Status      string    `gorm:"type:varchar(50);not null;default:'ACTIVE'" json:"status"`
 	CreatedAt   time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt   time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+	PlanFeatures []PlanFeature `gorm:"foreignKey:PlanID" json:"plan_features,omitempty"`
 }
 
 type PlanFeature struct {
@@ -81,7 +84,9 @@ type License struct {
 	CustomerID       string     `gorm:"type:varchar(36);not null" json:"customer_id"` 
 	Customer         Customer   `gorm:"foreignKey:CustomerID" json:"customer,omitempty"`
 	ProductID        string     `gorm:"type:varchar(36);not null" json:"product_id"`
+	Product          Product    `gorm:"foreignKey:ProductID" json:"product,omitempty"`
 	PlanID           string     `gorm:"type:varchar(36);not null" json:"plan_id"`
+	Plan             Plan       `gorm:"foreignKey:PlanID" json:"plan,omitempty"`
 	InstallationID   *string    `gorm:"type:varchar(36)" json:"installation_id"` 
 	Installation     *Installation `gorm:"foreignKey:InstallationID" json:"installation,omitempty"`
 	Status           string     `gorm:"type:varchar(50);not null;default:'PENDING'" json:"status"`
@@ -163,4 +168,8 @@ type TransferLog struct {
 	AuthorizedBy  string    `gorm:"type:varchar(36);not null" json:"authorized_by"`
 	CreatedAt     time.Time `gorm:"autoCreateTime" json:"created_at"`
 }
+
+
+
+
 

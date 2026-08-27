@@ -20,7 +20,7 @@ func NewHandler(db *gorm.DB) *Handler {
 
 func (h *Handler) GetAll(c *gin.Context) {
 	var plans []database.Plan
-	if err := h.DB.Preload("Product").Find(&plans).Error; err != nil {
+	if err := h.DB.Preload("Product").Preload("PlanFeatures").Preload("PlanFeatures.Feature").Find(&plans).Error; err != nil {
 		middleware.ErrorResponse(c, http.StatusInternalServerError, "INTERNAL_ERROR", "Failed to fetch plans")
 		return
 	}
@@ -88,4 +88,45 @@ func (h *Handler) Create(c *gin.Context) {
 	}
 
 	middleware.SuccessResponse(c, plan)
+}
+
+type UpdateFeaturesRequest struct {
+	Features []FeatureInput `json:"features"`
+}
+
+func (h *Handler) UpdateFeatures(c *gin.Context) {
+	planID := c.Param("id")
+	var req UpdateFeaturesRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		middleware.ErrorResponse(c, http.StatusBadRequest, "INVALID_REQUEST", err.Error())
+		return
+	}
+
+	err := h.DB.Transaction(func(tx *gorm.DB) error {
+		// Clear existing features
+		if err := tx.Where("plan_id = ?", planID).Delete(&database.PlanFeature{}).Error; err != nil {
+			return err
+		}
+
+		// Insert new features
+		for _, f := range req.Features {
+			planFeature := database.PlanFeature{
+				ID:        uuid.NewString(),
+				PlanID:    planID,
+				FeatureID: f.FeatureID,
+				Value:     f.Value,
+			}
+			if err := tx.Create(&planFeature).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		middleware.ErrorResponse(c, http.StatusInternalServerError, "INTERNAL_ERROR", "Failed to update plan features")
+		return
+	}
+
+	middleware.SuccessResponse(c, gin.H{"message": "Plan features updated successfully"})
 }

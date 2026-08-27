@@ -71,18 +71,24 @@ func main() {
 
 			admin.GET("/plans", planHandler.GetAll)
 			admin.POST("/plans", planHandler.Create)
+			admin.PUT("/plans/:id/features", planHandler.UpdateFeatures)
 
 			admin.GET("/features", featureHandler.GetAll)
 			admin.POST("/features", featureHandler.Create)
+			admin.PUT("/features/:id", featureHandler.Update)
+			admin.DELETE("/features/:id", featureHandler.Delete)
 
 			admin.GET("/customers", customerHandler.GetAll)
 			admin.POST("/customers", customerHandler.Create)
+			admin.PUT("/customers/:id", customerHandler.Update)
+			admin.DELETE("/customers/:id", customerHandler.Delete)
 
 			admin.GET("/licenses", licenseAdminHandler.GetAll)
 			admin.POST("/licenses", licenseAdminHandler.Create)
 			admin.POST("/licenses/:id/suspend", licenseAdminHandler.Suspend)
 			admin.POST("/licenses/:id/resume", licenseAdminHandler.Resume)
 			admin.POST("/licenses/:id/revoke", licenseAdminHandler.Revoke)
+			admin.DELETE("/licenses/:id", licenseAdminHandler.Delete)
 
 			admin.GET("/installations", installationHandler.GetAll)
 			admin.GET("/logs", auditHandler.GetAllLogs)
@@ -94,3 +100,7 @@ func main() {
 		log.Fatalf("Failed to run server: %v", err)
 	}
 }
+
+
+
+
