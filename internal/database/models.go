@@ -13,6 +13,7 @@ type User struct {
 	Status       string    `gorm:"type:varchar(50);not null;default:'ACTIVE'" json:"status"`
 	CreatedAt    time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt    time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+	Licenses     []License `gorm:"foreignKey:CustomerID" json:"licenses,omitempty"`
 }
 
 type Product struct {
@@ -76,6 +77,7 @@ type Customer struct {
 	Status       string    `gorm:"type:varchar(50);not null;default:'ACTIVE'" json:"status"`
 	CreatedAt    time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt    time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+	Licenses     []License `gorm:"foreignKey:CustomerID" json:"licenses,omitempty"`
 }
 
 type License struct {
@@ -88,7 +90,7 @@ type License struct {
 	PlanID           string     `gorm:"type:varchar(36);not null" json:"plan_id"`
 	Plan             Plan       `gorm:"foreignKey:PlanID" json:"plan,omitempty"`
 	InstallationID   *string    `gorm:"type:varchar(36)" json:"installation_id"` 
-	Installation     *Installation `gorm:"foreignKey:InstallationID" json:"installation,omitempty"`
+	Installation     *Installation `json:"installation,omitempty"`
 	Status           string     `gorm:"type:varchar(50);not null;default:'PENDING'" json:"status"`
 	ActivatedAt      *time.Time `json:"activated_at"`
 	LastValidationAt *time.Time `json:"last_validation_at"`
@@ -168,6 +170,9 @@ type TransferLog struct {
 	AuthorizedBy  string    `gorm:"type:varchar(36);not null" json:"authorized_by"`
 	CreatedAt     time.Time `gorm:"autoCreateTime" json:"created_at"`
 }
+
+
+
 
 
 

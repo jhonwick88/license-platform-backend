@@ -130,3 +130,26 @@ func (h *AdminHandler) Delete(c *gin.Context) {
 	}
 	middleware.SuccessResponse(c, gin.H{"message": "License deleted"})
 }
+
+func (h *AdminHandler) Unbind(c *gin.Context) {
+	id := c.Param("id")
+	var lic database.License
+	if err := h.DB.First(&lic, "id = ?", id).Error; err != nil {
+		middleware.ErrorResponse(c, http.StatusNotFound, "NOT_FOUND", "License not found")
+		return
+	}
+
+	if err := h.DB.Where("license_id = ?", id).Delete(&database.Installation{}).Error; err != nil {
+		middleware.ErrorResponse(c, http.StatusInternalServerError, "INTERNAL_ERROR", "Failed to clear associated installations")
+		return
+	}
+
+	lic.InstallationID = nil
+	lic.Status = "PENDING"
+	if err := h.DB.Save(&lic).Error; err != nil {
+		middleware.ErrorResponse(c, http.StatusInternalServerError, "INTERNAL_ERROR", "Failed to unbind license")
+		return
+	}
+
+	middleware.SuccessResponse(c, gin.H{"message": "License unbound successfully"})
+}

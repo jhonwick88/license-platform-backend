@@ -18,7 +18,8 @@ type LicenseTokenClaims struct {
 	ProductID      string                 `json:"product_id"`
 	CustomerID     string                 `json:"customer_id"`
 	PlanID         string                 `json:"plan_id"`
-	InstallationID string                 `json:"installation_id"`
+	InstallationID     string                 `json:"installation_id"`
+	MachineFingerprint string                 `json:"machine_fingerprint"`
 	Features       map[string]interface{} `json:"features"`
 }
 
@@ -39,3 +40,4 @@ func SignLicenseToken(claims LicenseTokenClaims, privateKey *rsa.PrivateKey) (st
 
 	return encodedPayload + "." + encodedSignature, nil
 }
+

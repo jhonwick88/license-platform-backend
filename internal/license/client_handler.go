@@ -1,6 +1,8 @@
 package license
 
 import (
+	"strconv"
+	"strings"
 	"crypto/rsa"
 	"net/http"
 	"time"
@@ -48,16 +50,45 @@ func (h *ClientHandler) Activate(c *gin.Context) {
 		return
 	}
 
+	// Fetch plan features
+	var planFeatures []database.PlanFeature
+	h.DB.Preload("Feature").Where("plan_id = ?", lic.PlanID).Find(&planFeatures)
+
+	featuresMap := make(map[string]interface{})
+	for _, pf := range planFeatures {
+		if pf.Feature.DataType == "NUMBER" {
+			if val, err := strconv.ParseFloat(pf.Value, 64); err == nil {
+				featuresMap[pf.Feature.Code] = val
+			} else {
+				featuresMap[pf.Feature.Code] = 0
+			}
+		} else if pf.Feature.DataType == "BOOLEAN" {
+			featuresMap[pf.Feature.Code] = (pf.Value == "1" || strings.ToLower(pf.Value) == "true")
+		} else {
+			featuresMap[pf.Feature.Code] = pf.Value
+		}
+	}
+
 	now := time.Now()
 	var installation database.Installation
 	err := h.DB.First(&installation, "license_id = ? AND machine_fingerprint = ?", lic.ID, req.MachineFingerprint).Error
 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			if lic.InstallationID != nil && *lic.InstallationID != "" {
-				middleware.ErrorResponse(c, http.StatusForbidden, "LICENSE_BOUND", "License is already bound to another machine")
+			// Check Max Devices
+			maxDevices := 1.0 // Default
+			if val, ok := featuresMap["max_devices"].(float64); ok {
+				maxDevices = val
+			}
+
+			var activeInstalls int64
+			h.DB.Model(&database.Installation{}).Where("license_id = ?", lic.ID).Count(&activeInstalls)
+
+			if float64(activeInstalls) >= maxDevices {
+				middleware.ErrorResponse(c, http.StatusForbidden, "MAX_DEVICES_REACHED", "Batas maksimal perangkat untuk lisensi ini telah tercapai.")
 				return
 			}
+
 			installation = database.Installation{
 				ID:                 uuid.NewString(),
 				LicenseID:          lic.ID,
@@ -85,13 +116,16 @@ func (h *ClientHandler) Activate(c *gin.Context) {
 		h.DB.Save(&installation)
 	}
 
+
+
 	claims := token.LicenseTokenClaims{
 		LicenseID:      lic.ID,
 		ProductID:      lic.ProductID,
 		CustomerID:     lic.CustomerID,
 		PlanID:         lic.PlanID,
-		InstallationID: installation.InstallationID,
-		Features:       map[string]interface{}{},
+		InstallationID:     installation.InstallationID,
+		MachineFingerprint: installation.MachineFingerprint,
+		Features:       featuresMap,
 	}
 
 	signedToken, err := token.SignLicenseToken(claims, h.PrivateKey)
@@ -110,3 +144,4 @@ func (h *ClientHandler) Activate(c *gin.Context) {
 func (h *ClientHandler) Validate(c *gin.Context) {
 	middleware.SuccessResponse(c, gin.H{"message": "Valid"})
 }
+
