@@ -88,6 +88,7 @@ func main() {
 			admin.POST("/licenses/:id/suspend", licenseAdminHandler.Suspend)
 			admin.POST("/licenses/:id/resume", licenseAdminHandler.Resume)
 			admin.POST("/licenses/:id/revoke", licenseAdminHandler.Revoke)
+			admin.POST("/licenses/:id/unbind", licenseAdminHandler.Unbind)
 			admin.DELETE("/licenses/:id", licenseAdminHandler.Delete)
 
 			admin.GET("/installations", installationHandler.GetAll)
@@ -100,6 +101,7 @@ func main() {
 		log.Fatalf("Failed to run server: %v", err)
 	}
 }
+
 
 
 
