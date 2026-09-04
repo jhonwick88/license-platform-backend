@@ -40,8 +40,13 @@ func (h *ClientHandler) Activate(c *gin.Context) {
 	}
 
 	var lic database.License
-	if err := h.DB.First(&lic, "license_key = ?", req.LicenseKey).Error; err != nil {
+	if err := h.DB.Preload("Customer").First(&lic, "license_key = ?", req.LicenseKey).Error; err != nil {
 		middleware.ErrorResponse(c, http.StatusUnauthorized, "INVALID_LICENSE", "License key not found")
+		return
+	}
+
+	if lic.Customer.ID != "" && lic.Customer.Status != "ACTIVE" {
+		middleware.ErrorResponse(c, http.StatusForbidden, "CUSTOMER_INACTIVE", "Customer account is not active")
 		return
 	}
 
@@ -56,16 +61,17 @@ func (h *ClientHandler) Activate(c *gin.Context) {
 
 	featuresMap := make(map[string]interface{})
 	for _, pf := range planFeatures {
+		codeKey := strings.ToLower(pf.Feature.Code)
 		if pf.Feature.DataType == "NUMBER" {
 			if val, err := strconv.ParseFloat(pf.Value, 64); err == nil {
-				featuresMap[pf.Feature.Code] = val
+				featuresMap[codeKey] = val
 			} else {
-				featuresMap[pf.Feature.Code] = 0
+				featuresMap[codeKey] = 0
 			}
 		} else if pf.Feature.DataType == "BOOLEAN" {
-			featuresMap[pf.Feature.Code] = (pf.Value == "1" || strings.ToLower(pf.Value) == "true")
+			featuresMap[codeKey] = (pf.Value == "1" || strings.ToLower(pf.Value) == "true")
 		} else {
-			featuresMap[pf.Feature.Code] = pf.Value
+			featuresMap[codeKey] = pf.Value
 		}
 	}
 
@@ -114,6 +120,14 @@ func (h *ClientHandler) Activate(c *gin.Context) {
 	} else {
 		installation.LastSeenAt = &now
 		h.DB.Save(&installation)
+
+		if lic.Status == "PENDING" {
+			lic.Status = "ACTIVE"
+			if lic.ActivatedAt == nil {
+				lic.ActivatedAt = &now
+			}
+			h.DB.Save(&lic)
+		}
 	}
 
 
