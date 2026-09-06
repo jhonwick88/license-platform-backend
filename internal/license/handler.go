@@ -27,6 +27,12 @@ func (h *AdminHandler) GetAll(c *gin.Context) {
 		middleware.ErrorResponse(c, http.StatusInternalServerError, "INTERNAL_ERROR", "Failed to fetch licenses")
 		return
 	}
+	
+	fmt.Printf("[DEBUG] GET /api/v1/admin/licenses called. Returning %d licenses.\n", len(licenses))
+	for _, l := range licenses {
+		fmt.Printf(" - LicenseID: %s, Status: %s, Customer: %s, Product: %s\n", l.ID, l.Status, l.Customer.Name, l.Product.Name)
+	}
+
 	middleware.SuccessResponse(c, licenses)
 }
 

@@ -62,6 +62,7 @@ func main() {
 
 		api.POST("/license/activate", licenseClientHandler.Activate)
 		api.POST("/license/validate", licenseClientHandler.Validate)
+		api.POST("/license/trial", licenseClientHandler.RequestTrial)
 
 		admin := api.Group("/admin")
 		admin.Use(auth.RequireAuth(cfg))

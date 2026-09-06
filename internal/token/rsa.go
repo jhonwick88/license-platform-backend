@@ -21,6 +21,7 @@ type LicenseTokenClaims struct {
 	InstallationID     string                 `json:"installation_id"`
 	MachineFingerprint string                 `json:"machine_fingerprint"`
 	Features       map[string]interface{} `json:"features"`
+	ExpiresAt      int64                  `json:"expires_at,omitempty"`
 }
 
 func SignLicenseToken(claims LicenseTokenClaims, privateKey *rsa.PrivateKey) (string, error) {

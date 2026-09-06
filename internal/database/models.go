@@ -13,7 +13,6 @@ type User struct {
 	Status       string    `gorm:"type:varchar(50);not null;default:'ACTIVE'" json:"status"`
 	CreatedAt    time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt    time.Time `gorm:"autoUpdateTime" json:"updated_at"`
-	Licenses     []License `gorm:"foreignKey:CustomerID" json:"licenses,omitempty"`
 }
 
 type Product struct {
@@ -24,7 +23,8 @@ type Product struct {
 	Status      string    `gorm:"type:varchar(50);not null;default:'ACTIVE'" json:"status"`
 	CreatedAt   time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt   time.Time `gorm:"autoUpdateTime" json:"updated_at"`
-	PlanFeatures []PlanFeature `gorm:"foreignKey:PlanID" json:"plan_features,omitempty"`
+	Plans       []Plan    `gorm:"foreignKey:ProductID" json:"plans,omitempty"`
+	Features    []Feature `gorm:"foreignKey:ProductID" json:"features,omitempty"`
 }
 
 type Plan struct {
@@ -51,7 +51,7 @@ type Feature struct {
 	Status      string    `gorm:"type:varchar(50);not null;default:'ACTIVE'" json:"status"`
 	CreatedAt   time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt   time.Time `gorm:"autoUpdateTime" json:"updated_at"`
-	PlanFeatures []PlanFeature `gorm:"foreignKey:PlanID" json:"plan_features,omitempty"`
+	PlanFeatures []PlanFeature `gorm:"foreignKey:FeatureID" json:"plan_features,omitempty"`
 }
 
 type PlanFeature struct {
@@ -94,6 +94,7 @@ type License struct {
 	Status           string     `gorm:"type:varchar(50);not null;default:'PENDING'" json:"status"`
 	ActivatedAt      *time.Time `json:"activated_at"`
 	LastValidationAt *time.Time `json:"last_validation_at"`
+	ExpiresAt        *time.Time `json:"expires_at"`
 	CreatedAt        time.Time  `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt        time.Time  `gorm:"autoUpdateTime" json:"updated_at"`
 }
