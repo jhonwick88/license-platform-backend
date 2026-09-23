@@ -169,6 +169,7 @@ func (h *ClientHandler) Validate(c *gin.Context) {
 
 type RequestTrialRequest struct {
 	MachineFingerprint string `json:"machine_fingerprint" binding:"required"`
+	ProductCode        string `json:"product_code" binding:"required"`
 	AppVersion         string `json:"app_version"`
 	Hostname           string `json:"hostname"`
 	Platform           string `json:"platform"`
@@ -201,15 +202,15 @@ func (h *ClientHandler) RequestTrial(c *gin.Context) {
 		h.DB.Create(&trialCustomer)
 	}
 
-	// Find any active product and plan to use for trial
+	// Find the specific product requested by the client
 	var product database.Product
-	if err := h.DB.First(&product, "status = 'ACTIVE'").Error; err != nil {
-		middleware.ErrorResponse(c, http.StatusInternalServerError, "NO_PRODUCT_FOUND", "No active products available")
+	if err := h.DB.First(&product, "product_code = ? AND status = 'ACTIVE'", req.ProductCode).Error; err != nil {
+		middleware.ErrorResponse(c, http.StatusNotFound, "PRODUCT_NOT_FOUND", "Product not found or inactive")
 		return
 	}
 	var plan database.Plan
-	if err := h.DB.First(&plan, "product_id = ? AND status = 'ACTIVE'", product.ID).Error; err != nil {
-		middleware.ErrorResponse(c, http.StatusInternalServerError, "NO_PLAN_FOUND", "No active plans available")
+	if err := h.DB.First(&plan, "product_id = ? AND code = ? AND status = 'ACTIVE'", product.ID, "PRO").Error; err != nil {
+		middleware.ErrorResponse(c, http.StatusInternalServerError, "NO_PLAN_FOUND", "No active PRO plan available for this product")
 		return
 	}
 

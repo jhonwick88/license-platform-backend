@@ -29,9 +29,9 @@ type Product struct {
 
 type Plan struct {
 	ID          string    `gorm:"type:varchar(36);primaryKey" json:"id"`
-	ProductID   string    `gorm:"type:varchar(36);not null" json:"product_id"` 
+	ProductID   string    `gorm:"type:varchar(36);not null;uniqueIndex:idx_product_plan_code" json:"product_id"` 
 	Product     Product   `gorm:"foreignKey:ProductID" json:"product,omitempty"`
-	Code        string    `gorm:"type:varchar(100);uniqueIndex;not null" json:"code"`
+	Code        string    `gorm:"type:varchar(100);not null;uniqueIndex:idx_product_plan_code" json:"code"`
 	Name        string    `gorm:"type:varchar(255);not null" json:"name"`
 	Description string    `gorm:"type:text" json:"description"`
 	Status      string    `gorm:"type:varchar(50);not null;default:'ACTIVE'" json:"status"`
@@ -42,9 +42,9 @@ type Plan struct {
 
 type Feature struct {
 	ID          string    `gorm:"type:varchar(36);primaryKey" json:"id"`
-	ProductID   string    `gorm:"type:varchar(36);not null" json:"product_id"` 
+	ProductID   string    `gorm:"type:varchar(36);not null;uniqueIndex:idx_product_feature_code" json:"product_id"` 
 	Product     Product   `gorm:"foreignKey:ProductID" json:"product,omitempty"`
-	Code        string    `gorm:"type:varchar(100);uniqueIndex;not null" json:"code"`
+	Code        string    `gorm:"type:varchar(100);not null;uniqueIndex:idx_product_feature_code" json:"code"`
 	Name        string    `gorm:"type:varchar(255);not null" json:"name"`
 	Description string    `gorm:"type:text" json:"description"`
 	DataType    string    `gorm:"type:varchar(50);not null" json:"data_type"`
